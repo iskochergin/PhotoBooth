@@ -1,17 +1,15 @@
-# PhotoBooth
-
 # 📸 Gesture-Activated Photo Booth
 
 Welcome to the **Gesture-Activated Photo Booth** project! 🎉 Capture memorable moments by simply making fun and unique gestures or facial expressions. Perfect for parties, events, or creating unforgettable memories! 🤳✨
 
 ## Table of Contents
 - [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Supported Gestures & Expressions](#supported-gestures--expressions)
-- [License](#license)
-- [Contributing](#contributing)
-- [Acknowledgements](#acknowledgements)
+- [Installation](#installation-🛠️)
+- [Usage](#usage-🚀)
+- [Supported Gestures & Expressions](#supported-gestures--expressions-📸)
+- [License](#license-📝)
+- [Contributing](#contributing-🤝)
+- [Acknowledgements](#acknowledgements-🙏)
 
 ## Features 🎯
 - **Hand Gesture Recognition**: Detects various hand gestures to trigger photo capture.
