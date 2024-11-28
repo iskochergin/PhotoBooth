@@ -2,8 +2,12 @@ import cv2
 import datetime
 import mediapipe as mp
 import math
+import os
+from delete_blured import delete_blurred_images
 
-# Инициализация MediaPipe для обнаружения лиц и рук
+SESSION_NAME = f'session_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}'
+os.mkdir(SESSION_NAME)
+
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(
     static_image_mode=False,
@@ -152,56 +156,6 @@ def is_rock_n_roll_gesture(hand_landmarks):
     return fingers["index"] and fingers["pinky"] and not fingers["middle"] and not fingers["ring"]
 
 
-def is_kiss_detected(face_landmarks):
-    """
-    Определение поцелуя на основе:
-    1. Среднего вертикального расстояния между верхней и нижней губами.
-    2. Отношения этого расстояния к ширине лица.
-    3. Проверки формы губ (трубочка) на основе расстояний между боковыми точками губ.
-    """
-    # Ключевые точки верхней и нижней губы
-    upper_lip_points = [61, 185, 40, 39, 37, 0]
-    lower_lip_points = [17, 84, 181, 408, 14, 87]
-
-    # Расчет среднего вертикального расстояния верхней и нижней губ
-    upper_lip_y = sum([face_landmarks.landmark[i].y for i in upper_lip_points]) / len(upper_lip_points)
-    lower_lip_y = sum([face_landmarks.landmark[i].y for i in lower_lip_points]) / len(lower_lip_points)
-    lip_distance = lower_lip_y - upper_lip_y
-
-    # Горизонтальное расстояние между углами губ (левая и правая стороны)
-    left_corner = face_landmarks.landmark[61]
-    right_corner = face_landmarks.landmark[291]
-    horizontal_distance = right_corner.x - left_corner.x
-
-    # Отношение расстояния между губами к ширине лица
-    ratio = lip_distance / horizontal_distance if horizontal_distance != 0 else 0
-
-    # Дополнительная проверка формы губ (трубочка)
-    # Измеряем расстояния между верхней и нижней губой в нескольких точках
-    # Выберем точки середины верхней и нижней губы
-    upper_mid = face_landmarks.landmark[13]  # Средняя верхняя губа
-    lower_mid = face_landmarks.landmark[14]  # Средняя нижняя губа
-    upper_mid_x = upper_mid.x
-    upper_mid_y = upper_mid.y
-    lower_mid_x = lower_mid.x
-    lower_mid_y = lower_mid.y
-
-    # Расстояние между средними точками губ (горизонтальное)
-    mid_horizontal_distance = lower_mid.x - upper_mid.x
-
-    # Проверяем, что средние точки губ близки друг к другу
-    mid_distance_threshold = 0.02  # Настраивается
-    is_tubular = abs(mid_horizontal_distance) < mid_distance_threshold
-
-    # Пороговое значение для распознавания поцелуя (настраивается)
-    ratio_threshold = 0.03  # Настраивается
-
-    # Определяем поцелуй, если выполняются все условия
-    is_kiss = (ratio < ratio_threshold) and is_tubular
-
-    return is_kiss, lip_distance, ratio
-
-
 def detect_smile(face_landmarks):
     """Определяет, улыбается ли лицо на основе ключевых точек лица."""
     # Используем ключевые точки на губах
@@ -257,17 +211,6 @@ try:
                     smile_detected = True
                     print("Улыбка обнаружена.")
 
-                # Определение поцелуя
-                kiss, lip_dist, ratio = is_kiss_detected(face_landmarks)
-                if kiss:
-                    kiss_counter += 1
-                    if kiss_counter >= KISS_CONSECUTIVE_FRAMES:
-                        kiss_detected_final = True
-                        print("Поцелуй подтвержден.")
-                else:
-                    kiss_counter = 0
-                    kiss_detected_final = False
-
                 # Вычисляем и рисуем ограничивающий прямоугольник вокруг лица
                 x_coords = [lm.x for lm in face_landmarks.landmark]
                 y_coords = [lm.y for lm in face_landmarks.landmark]
@@ -279,12 +222,6 @@ try:
                     cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (0, 0, 255), 2)  # Красный цвет
                 else:
                     cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), (255, 0, 0), 2)  # Синий цвет
-
-                # Визуализация расстояния между губами и отношения
-                cv2.putText(frame, f"Lip Dist: {lip_dist:.4f}", (xmin, ymax + 20),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
-                cv2.putText(frame, f"Ratio: {ratio:.4f}", (xmin, ymax + 40),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
                 # Рисуем сетку лицевых ключевых точек (опционально)
                 mp_draw.draw_landmarks(
@@ -349,7 +286,7 @@ try:
             if not snapshot_taken:
                 try:
                     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-                    filename = f"snapshot_{timestamp}.png"
+                    filename = f"{SESSION_NAME}/snapshot_{timestamp}.png"
                     cv2.imwrite(filename, original_frame)
                     print(f"Снимок сохранён как {filename}")
                     snapshot_taken = True
@@ -386,4 +323,9 @@ finally:
     # Освобождение ресурсов
     cap.release()
     cv2.destroyAllWindows()
-    print("Ресурсы освобождены. Программа завершена.")
+    print("Ресурсы освобождены")
+
+    # Удаление размытых фотографий
+    delete_blurred_images(SESSION_NAME, threshold=200)
+    print("Размытые фотографии удалены")
+    print("Программа завершена")
