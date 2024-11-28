@@ -4,12 +4,12 @@ Welcome to the **Gesture-Activated Photo Booth** project! 🎉 Capture memorable
 
 ## Table of Contents
 - [Features](#features)
-- [Installation](#installation-🛠️)
-- [Usage](#usage-🚀)
-- [Supported Gestures & Expressions](#supported-gestures--expressions-📸)
-- [License](#license-📝)
-- [Contributing](#contributing-🤝)
-- [Acknowledgements](#acknowledgements-🙏)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Supported Gestures & Expressions](#supported-gestures--expressions)
+- [License](#license)
+- [Contributing](#contributing)
+- [Acknowledgements](#acknowledgements)
 
 ## Features 🎯
 - **Hand Gesture Recognition**: Detects various hand gestures to trigger photo capture.
@@ -70,9 +70,9 @@ Welcome to the **Gesture-Activated Photo Booth** project! 🎉 Capture memorable
 - **Raised Eyebrows** 🙆
 - **Puckered Lips** 😗
 
-## License 📝
+## License
 
-This project is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). Feel free to use and modify the code as per the license terms.
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). Feel free to use and modify the code as per the license terms.
 
 ## Contributing 🤝
 
