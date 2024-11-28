@@ -1,6 +1,6 @@
 # 📸 Gesture-Activated Photo Booth
 
-Welcome to the **Gesture-Activated Photo Booth** project! 🎉 Capture memorable moments by simply making fun and unique gestures or facial expressions. Perfect for parties, events, or creating unforgettable memories! 🤳✨
+Welcome to the **Gesture-Activated Photo Booth** project! Capture memorable moments by simply making fun and unique gestures or facial expressions. Perfect for parties, events, or creating unforgettable memories! 🤳✨
 
 ## Features 🎯
 - **Hand Gesture Recognition**: Detects various hand gestures to trigger photo capture. ✋
@@ -27,7 +27,6 @@ Welcome to the **Gesture-Activated Photo Booth** project! 🎉 Capture memorable
    ```bash
    pip install -r requirements.txt
    ```
-   *Ensure you have Python 3.7 or higher.*
 
 ## Usage 🚀
 
@@ -46,21 +45,7 @@ Welcome to the **Gesture-Activated Photo Booth** project! 🎉 Capture memorable
    - Pucker your lips 😗
 
 3. **Photo Capture**
-   - The application will automatically take a photo when it detects any of the above gestures or expressions.
-
-## Supported Gestures & Expressions 📸
-
-### Hand Gestures ✋
-- **Victory ("V") Sign** ✌️
-- **OK Sign** 👌
-- **Fist** ✊
-- **Like (Thumbs Up)** 👍
-- **Rock-n-Roll** 🤘
-
-### Facial Expressions 😊
-- **Smile** 😊
-- **Raised Eyebrows** 🙆
-- **Puckered Lips** 😗
+   - The application will automatically take a photo when it detects any of the above gestures or expressions and save it in the new folder "session_{date_time}".
 
 ## License
 
@@ -90,7 +75,3 @@ Contributions are welcome! If you have suggestions, improvements, or bug fixes, 
 - **[MediaPipe](https://mediapipe.dev/)** for the powerful landmark detection.
 - **[NumPy](https://numpy.org/)** and **[OpenCV](https://opencv.org/)** for providing essential tools for computer vision tasks.
 - **[OpenCV](https://opencv.org/)** for its extensive and efficient functionalities in image and video analysis.
-
----
-
-Enjoy capturing your unique moments with the Gesture-Activated Photo Booth! 📷✨ If you have any questions or need support, feel free to reach out. Happy snapping! 😄
