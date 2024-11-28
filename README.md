@@ -74,4 +74,3 @@ Contributions are welcome! If you have suggestions, improvements, or bug fixes, 
 
 - **[MediaPipe](https://mediapipe.dev/)** for the powerful landmark detection.
 - **[NumPy](https://numpy.org/)** and **[OpenCV](https://opencv.org/)** for providing essential tools for computer vision tasks.
-- **[OpenCV](https://opencv.org/)** for its extensive and efficient functionalities in image and video analysis.
