@@ -11,7 +11,7 @@ Welcome to the **Gesture-Activated Photo Booth** project! 🎉 Capture memorable
 - [Contributing](#contributing)
 - [Acknowledgements](#acknowledgements)
 
-## Features 🎯
+## Features
 - **Hand Gesture Recognition**: Detects various hand gestures to trigger photo capture.
 - **Facial Expression Recognition**: Identifies specific facial expressions to take photos.
 - **Automated Photo Capture**: Automatically takes photos when the correct gesture or expression is detected.
