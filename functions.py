@@ -39,19 +39,40 @@ def is_finger_extended(hand_landmarks, finger_tip, finger_pip):
     return hand_landmarks.landmark[finger_tip].y < hand_landmarks.landmark[finger_pip].y
 
 
-def calculate_angle(landmark1, landmark2):
+def calculate_angle_2points(landmark1, landmark2):
     """Вычисление угла между двумя точками"""
     return np.arctan2(landmark2.y - landmark1.y, landmark2.x - landmark1.x) * 180 / np.pi
 
 
+def calculate_angle_3points(point1, point2, point3):
+    """
+    Рассчитывает угол между тремя точками.
+    point1, point2, point3 - это объекты с координатами (x, y, z).
+    """
+    vector1 = [point1.x - point2.x, point1.y - point2.y, point1.z - point2.z]
+    vector2 = [point3.x - point2.x, point3.y - point2.y, point3.z - point2.z]
+
+    dot_product = sum([vector1[i] * vector2[i] for i in range(3)])
+    norm1 = math.sqrt(sum([vector1[i] ** 2 for i in range(3)]))
+    norm2 = math.sqrt(sum([vector2[i] ** 2 for i in range(3)]))
+
+    # Косинус угла
+    cos_angle = dot_product / (norm1 * norm2)
+    # Ограничиваем значение cos_angle для избежания ошибок из-за погрешностей в вычислениях
+    cos_angle = max(min(cos_angle, 1), -1)
+    # Рассчитываем угол в радианах и переводим в градусы
+    angle = math.degrees(math.acos(cos_angle))
+    return angle
+
+
 def is_hand_reversed(hand_landmarks, handedness):
-    """Проверка того, что ладонь перевернуто, этого надо избежать при определении жеста СТОП"""
+    """Проверка того, что ладонь перевернута, этого надо избежать при определении жеста СТОП"""
     wrist = hand_landmarks.landmark[mp.solutions.hands.HandLandmark.WRIST]
     thumb_tip = hand_landmarks.landmark[mp.solutions.hands.HandLandmark.THUMB_TIP]
     index_tip = hand_landmarks.landmark[mp.solutions.hands.HandLandmark.INDEX_FINGER_TIP]
 
-    angle_thumb = calculate_angle(wrist, thumb_tip)
-    angle_index = calculate_angle(wrist, index_tip)
+    angle_thumb = calculate_angle_2points(wrist, thumb_tip)
+    angle_index = calculate_angle_2points(wrist, index_tip)
 
     if handedness.classification[0].label == 'Right':
         return angle_thumb > angle_index
@@ -117,23 +138,89 @@ def is_ok_gesture(hand_landmarks):
 
 def is_fist_gesture(hand_landmarks):
     """Распознавание жеста 'Сжатый кулак'."""
+    landmarks = hand_landmarks.landmark
+
+    finger_tips = {
+        "thumb_tip": landmarks[mp_hands.HandLandmark.THUMB_TIP],
+        "index_finger_tip": landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP],
+        "middle_finger_tip": landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP],
+        "ring_finger_tip": landmarks[mp_hands.HandLandmark.RING_FINGER_TIP],
+        "pinky_tip": landmarks[mp_hands.HandLandmark.PINKY_TIP],
+    }
+
+    finger_joints = {
+        "thumb_joint": landmarks[mp_hands.HandLandmark.THUMB_CMC],
+        "index_finger_joint": landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP],
+        "middle_finger_joint": landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP],
+        "ring_finger_joint": landmarks[mp_hands.HandLandmark.RING_FINGER_MCP],
+        "pinky_joint": landmarks[mp_hands.HandLandmark.PINKY_MCP],
+    }
+    wrist = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST]
+    thumb_angle = calculate_angle_3points(finger_joints["thumb_joint"], finger_tips["thumb_tip"], wrist)
+
     is_fist = True
-    for finger_tip, finger_pip in [
-        (mp_hands.HandLandmark.INDEX_FINGER_TIP, mp_hands.HandLandmark.INDEX_FINGER_PIP),
-        (mp_hands.HandLandmark.MIDDLE_FINGER_TIP, mp_hands.HandLandmark.MIDDLE_FINGER_PIP),
-        (mp_hands.HandLandmark.RING_FINGER_TIP, mp_hands.HandLandmark.RING_FINGER_PIP),
-        (mp_hands.HandLandmark.PINKY_TIP, mp_hands.HandLandmark.PINKY_PIP)
-    ]:
-        if is_finger_extended(hand_landmarks, finger_tip, finger_pip):
+    for tip, joint in zip(finger_tips.keys(), finger_joints.keys()):
+        if tip == "thumb_tip":
+            continue
+        if finger_tips[tip].y < finger_joints[joint].y:
             is_fist = False
             break
-    thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
-    thumb_ip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP]
-    is_thumb_down = thumb_tip.y > thumb_ip.y
-    return is_fist and is_thumb_down
+
+    print('thumb_angle:', thumb_angle)
+    return is_fist and thumb_angle > 12
+
+    # is_fist = True
+    # for finger_tip, finger_pip in [
+    #     (mp_hands.HandLandmark.INDEX_FINGER_TIP, mp_hands.HandLandmark.INDEX_FINGER_PIP),
+    #     (mp_hands.HandLandmark.MIDDLE_FINGER_TIP, mp_hands.HandLandmark.MIDDLE_FINGER_PIP),
+    #     (mp_hands.HandLandmark.RING_FINGER_TIP, mp_hands.HandLandmark.RING_FINGER_PIP),
+    #     (mp_hands.HandLandmark.PINKY_TIP, mp_hands.HandLandmark.PINKY_PIP)
+    # ]:
+    #     if is_finger_extended(hand_landmarks, finger_tip, finger_pip):
+    #         is_fist = False
+    #         break
+    # thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
+    # thumb_ip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP]
+    # is_thumb_down = thumb_tip.y > thumb_ip.y
+    # return is_fist and is_thumb_down
 
 
-def is_like_gesture(hand_landmarks):
+def is_hear_gesture(hand_landmarks):
+    """Распознавание жеста 'Сердце'."""
+
+    landmarks = hand_landmarks.landmark
+
+    finger_tips = {
+        "thumb_tip": landmarks[mp_hands.HandLandmark.THUMB_TIP],
+        "index_finger_tip": landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP],
+        "middle_finger_tip": landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_TIP],
+        "ring_finger_tip": landmarks[mp_hands.HandLandmark.RING_FINGER_TIP],
+        "pinky_tip": landmarks[mp_hands.HandLandmark.PINKY_TIP],
+    }
+
+    finger_joints = {
+        "thumb_joint": landmarks[mp_hands.HandLandmark.THUMB_CMC],
+        "index_finger_joint": landmarks[mp_hands.HandLandmark.INDEX_FINGER_MCP],
+        "middle_finger_joint": landmarks[mp_hands.HandLandmark.MIDDLE_FINGER_MCP],
+        "ring_finger_joint": landmarks[mp_hands.HandLandmark.RING_FINGER_MCP],
+        "pinky_joint": landmarks[mp_hands.HandLandmark.PINKY_MCP],
+    }
+    wrist = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST]
+    thumb_angle = calculate_angle_3points(finger_joints["thumb_joint"], finger_tips["thumb_tip"], wrist)
+
+    is_fist = True
+    for tip, joint in zip(finger_tips.keys(), finger_joints.keys()):
+        if tip == "thumb_tip":
+            continue
+        if finger_tips[tip].y < finger_joints[joint].y:
+            is_fist = False
+            break
+
+    print('thumb_angle:', thumb_angle)
+    return is_fist and 7 < thumb_angle < 12 and not is_fist_gesture(hand_landmarks)
+
+
+def is_thumb_up(hand_landmarks):
     """
     Распознавание жеста 'Лайк' - поднятый только большой палец.
 
@@ -144,7 +231,13 @@ def is_like_gesture(hand_landmarks):
     thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
     wrist = hand_landmarks.landmark[mp_hands.HandLandmark.WRIST]
     index_finger_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
-    return thumb_tip.y < wrist.y and index_finger_tip.y > thumb_tip.y
+    thumb_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_CMC]
+
+    if thumb_tip.y < wrist.y and index_finger_tip.y > thumb_tip.y:
+        angle = calculate_angle_3points(thumb_mcp, thumb_tip, wrist)
+        if angle < 4:
+            return True
+    return False
 
 
 def is_rock_n_roll_gesture(hand_landmarks):

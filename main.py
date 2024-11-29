@@ -117,9 +117,12 @@ try:
                 elif is_rock_n_roll_gesture(hand_landmarks):
                     gesture_detected = True
                     detected_gesture = "Rock-n-Roll Gesture"
-                elif is_like_gesture(hand_landmarks):
+                elif is_thumb_up(hand_landmarks):
                     gesture_detected = True
-                    detected_gesture = "Like"
+                    detected_gesture = "Thumb up"
+                elif is_hear_gesture(hand_landmarks):
+                    gesture_detected = True
+                    detected_gesture = "Heart"
 
                 if gesture_detected:
                     mp_draw.draw_landmarks(
