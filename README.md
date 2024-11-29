@@ -5,6 +5,7 @@ Welcome to the **Gesture-Activated Photo Booth** project! Capture memorable mome
 ## Features 🎯
 - **Hand Gesture Recognition**: Detects various hand gestures to trigger photo capture. ✋
 - **Facial Expression Recognition**: Identifies specific facial expressions to take photos. 😊
+- **Multiple Gestures and Expressions**: Supports a variety of gestures and expressions for photo capture. 🤘👍
 - **Automated Photo Capture**: Automatically takes photos when the correct gesture or expression is detected. 📸
 - **Real-Time Processing**: Utilizes MediaPipe for efficient and real-time landmark detection.⚡️
 - **Intelligent Image Capture**: Ensures crystal-clear photos by automatically discarding blurred images and capturing only when the subject is in sharp focus. 🔍📷
@@ -38,11 +39,13 @@ Welcome to the **Gesture-Activated Photo Booth** project! Capture memorable mome
    - Make a "V" sign ✌️
    - Perform the "OK" sign 👌
    - Create a fist ✊
-   - Give a thumbs up 👍 (Like gesture)
+   - Give a thumbs up 👍
    - Rock-n-Roll gesture 🤘
    - Smile 😊
    - Raise your eyebrows 🙆
    - Pucker your lips 😗
+   - Make a heart sign 🫶
+   - ENJOY SIGMA EMOJI!!! 🤫🧏
 
 3. **Photo Capture**
    - The application will automatically take a photo when it detects any of the above gestures or expressions and save it in the new folder "session_{date_time}".
