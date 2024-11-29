@@ -34,6 +34,9 @@ cap.set(cv2.CAP_PROP_FRAME_WIDTH, IMAGE_WIDTH)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, IMAGE_HEIGHT)
 
 snapshot_taken = False
+count_frames = 0
+detected_emotions = []
+same_detect_count = 0
 
 try:
     while True:
@@ -45,12 +48,16 @@ try:
         original_frame = frame.copy()
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         face_results = face_mesh.process(rgb)
+        count_frames += 1
+
+        if count_frames < 150:
+            cv2.putText(frame, "Show some emotion and freeze!", (140, 270), cv2.FONT_HERSHEY_SIMPLEX,
+                        2, (255, 0, 0), 4, cv2.LINE_AA)
 
         smile_detected = False
-        closed_smile_detected = False
         puckered_lips_detected = False
         raised_eyebrows_detected = False
-        open_mouth = False
+        detected_emotions_new = []
 
         if face_results.multi_face_landmarks:
             for face_landmarks in face_results.multi_face_landmarks:
@@ -77,8 +84,8 @@ try:
                 ymin, ymax = int(min(y_coords) * h), int(max(y_coords) * h)
 
                 # Определяем цвет прямоугольника на основе обнаруженных выражений
-                if (smile_detected or closed_smile_detected or puckered_lips_detected or
-                        raised_eyebrows_detected or open_mouth):
+                if (smile_detected or puckered_lips_detected or
+                        raised_eyebrows_detected):
                     color = (0, 0, 255)  # Красный цвет для обнаруженных искажений
                 else:
                     color = (255, 0, 0)  # Синий цвет для нормального лица
@@ -141,9 +148,40 @@ try:
                         mp_draw.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2)
                     )
 
+        # Добавляем текст с названием жеста (если обнаружен)
+        if gesture_detected and detected_gesture:
+            cv2.putText(frame, detected_gesture, (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
+                        1, (0, 0, 255), 2, cv2.LINE_AA)
+            detected_emotions_new.append(detected_gesture)
+
+        # Добавление текста для выражений лица
+        y_position = 150
+        if smile_detected:
+            cv2.putText(frame, "Smile Detected", (50, y_position), cv2.FONT_HERSHEY_SIMPLEX,
+                        1, (0, 255, 0), 2, cv2.LINE_AA)
+            y_position += 40
+            detected_emotions_new.append("Smile")
+        if puckered_lips_detected:
+            cv2.putText(frame, "SIGMA/Puckered Lips", (50, y_position), cv2.FONT_HERSHEY_SIMPLEX,
+                        1, (0, 165, 255), 2, cv2.LINE_AA)
+            y_position += 40
+            detected_emotions_new.append("Puckered Lips")
+        if raised_eyebrows_detected:
+            cv2.putText(frame, "Raised Eyebrows", (50, y_position), cv2.FONT_HERSHEY_SIMPLEX,
+                        1, (255, 255, 0), 2, cv2.LINE_AA)
+            y_position += 40
+            detected_emotions_new.append("Raised Eyebrows")
+
+        cv2.imshow('PhotoBooth', frame)
+
+        if detected_emotions == detected_emotions_new and detected_emotions:
+            same_detect_count += 1
+        else:
+            same_detect_count = 0
+            detected_emotions = detected_emotions_new
+
         # Условие для сохранения снимка: обнаружено любое выражение лица или один из жестов
-        if (smile_detected or closed_smile_detected or puckered_lips_detected or
-                raised_eyebrows_detected or open_mouth or gesture_detected):
+        if same_detect_count == 15 or (same_detect_count % 52 == 0 and same_detect_count != 0):
             if not snapshot_taken:
                 try:
                     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -155,36 +193,6 @@ try:
                     print(f"Ошибка при сохранении снимка: {e}")
         else:
             snapshot_taken = False
-
-        # Добавляем текст с названием жеста (если обнаружен)
-        if gesture_detected and detected_gesture:
-            cv2.putText(frame, detected_gesture, (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (0, 0, 255), 2, cv2.LINE_AA)
-
-        # Добавление текста для выражений лица
-        y_position = 150
-        if smile_detected:
-            cv2.putText(frame, "Smile Detected", (50, y_position), cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (0, 255, 0), 2, cv2.LINE_AA)
-            y_position += 40
-        if closed_smile_detected:
-            cv2.putText(frame, "Closed Smile Detected", (50, y_position), cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (0, 255, 255), 2, cv2.LINE_AA)
-            y_position += 40
-        if puckered_lips_detected:
-            cv2.putText(frame, "Puckered Lips", (50, y_position), cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (0, 165, 255), 2, cv2.LINE_AA)
-            y_position += 40
-        if raised_eyebrows_detected:
-            cv2.putText(frame, "Raised Eyebrows", (50, y_position), cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (255, 255, 0), 2, cv2.LINE_AA)
-            y_position += 40
-        if open_mouth:
-            cv2.putText(frame, "Open Mouth", (50, y_position), cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (0, 165, 255), 2, cv2.LINE_AA)
-            y_position += 40
-
-        cv2.imshow('PhotoBooth', frame)
 
         # Выход по нажатию клавиши 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):

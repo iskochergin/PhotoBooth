@@ -166,23 +166,8 @@ def is_fist_gesture(hand_landmarks):
             is_fist = False
             break
 
-    print('thumb_angle:', thumb_angle)
+    # print('thumb_angle:', thumb_angle)
     return is_fist and thumb_angle > 12
-
-    # is_fist = True
-    # for finger_tip, finger_pip in [
-    #     (mp_hands.HandLandmark.INDEX_FINGER_TIP, mp_hands.HandLandmark.INDEX_FINGER_PIP),
-    #     (mp_hands.HandLandmark.MIDDLE_FINGER_TIP, mp_hands.HandLandmark.MIDDLE_FINGER_PIP),
-    #     (mp_hands.HandLandmark.RING_FINGER_TIP, mp_hands.HandLandmark.RING_FINGER_PIP),
-    #     (mp_hands.HandLandmark.PINKY_TIP, mp_hands.HandLandmark.PINKY_PIP)
-    # ]:
-    #     if is_finger_extended(hand_landmarks, finger_tip, finger_pip):
-    #         is_fist = False
-    #         break
-    # thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
-    # thumb_ip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP]
-    # is_thumb_down = thumb_tip.y > thumb_ip.y
-    # return is_fist and is_thumb_down
 
 
 def is_hear_gesture(hand_landmarks):
@@ -209,15 +194,22 @@ def is_hear_gesture(hand_landmarks):
     thumb_angle = calculate_angle_3points(finger_joints["thumb_joint"], finger_tips["thumb_tip"], wrist)
 
     is_fist = True
+    com_dif = []
     for tip, joint in zip(finger_tips.keys(), finger_joints.keys()):
         if tip == "thumb_tip":
             continue
-        if finger_tips[tip].y < finger_joints[joint].y:
+        if finger_tips[tip].y + 0.2 < finger_joints[joint].y:
             is_fist = False
             break
+        # print(finger_tips[tip].y - finger_joints[joint].y, end=' ')
+        com_dif.append(finger_tips[tip].y - finger_joints[joint].y)
+    for a in com_dif:
+        for b in com_dif:
+            if abs(a - b) > 0.05:
+                is_fist = False
+                break
 
-    print('thumb_angle:', thumb_angle)
-    return is_fist and 7 < thumb_angle < 12 and not is_fist_gesture(hand_landmarks)
+    return is_fist and 6 < thumb_angle < 12 and not is_fist_gesture(hand_landmarks)
 
 
 def is_thumb_up(hand_landmarks):
