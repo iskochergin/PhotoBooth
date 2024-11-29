@@ -5,11 +5,16 @@ import mediapipe as mp
 mp_hands = mp.solutions.hands
 
 
-def calculate_distance(point1, point2):
+def calculate_distance_xyz(point1, point2):
     """Вычисляет евклидово расстояние между двумя точками"""
     return math.sqrt((point1.x - point2.x) ** 2 +
                      (point1.y - point2.y) ** 2 +
                      (point1.z - point2.z) ** 2)
+
+
+def calculate_distance_xy(point1, point2):
+    """Вычисляет расстояние между двумя точками на плоскости"""
+    return math.sqrt((point1.x - point2.x) ** 2 + (point1.y - point2.y) ** 2)
 
 
 def calculate_normalized_distance(x1, y1, x2, y2, image_width, image_height):
@@ -122,7 +127,7 @@ def is_ok_gesture(hand_landmarks):
     """Распознавание жеста 'ОК'."""
     thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
     index_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
-    distance = calculate_distance(thumb_tip, index_tip)
+    distance = calculate_distance_xyz(thumb_tip, index_tip)
 
     is_ok_distance = distance < 0.03
 
@@ -229,6 +234,40 @@ def is_thumb_up(hand_landmarks):
         angle = calculate_angle_3points(thumb_mcp, thumb_tip, wrist)
         if angle < 4:
             return True
+    return False
+
+
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+
+def SIGMA_DETECTOR(hand_landmarks, face_landmarks, scale):
+    """БЕЗ КОММЕНТАРИЕВ!!!"""
+
+    landmarks = hand_landmarks.landmark
+    finger_tips = {
+        "thumb_tip": landmarks[mp_hands.HandLandmark.THUMB_TIP],
+        "index_finger_tip": landmarks[mp_hands.HandLandmark.INDEX_FINGER_TIP],
+    }
+
+    landmarks = face_landmarks.landmark
+    mouth_top = landmarks[78]
+    mouth_bottom = landmarks[87]
+
+    index_finger_tip = finger_tips["index_finger_tip"]
+
+    mouth_center = Point(
+        (mouth_top.x + mouth_bottom.x) / 2,
+        (mouth_top.y + mouth_bottom.y) / 2
+    )
+
+    distance = calculate_distance_xy(index_finger_tip, mouth_center)
+
+    if distance / scale < 0.0005:
+        return True
+
     return False
 
 

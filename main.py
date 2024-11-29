@@ -27,7 +27,6 @@ hands = mp_hands.Hands(
 
 mp_draw = mp.solutions.drawing_utils
 
-
 cap = cv2.VideoCapture(0)
 
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, IMAGE_WIDTH)
@@ -88,16 +87,16 @@ try:
                         raised_eyebrows_detected):
                     color = (0, 0, 255)  # Красный цвет для обнаруженных искажений
                 else:
-                    color = (255, 0, 0)  # Синий цвет для нормального лица
+                    color = (0, 255, 0)  # Синий цвет для нормального лица
 
                 cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
-                mp_draw.draw_landmarks(
-                    frame,
-                    face_landmarks,
-                    mp_face_mesh.FACEMESH_TESSELATION,
-                    mp_draw.DrawingSpec(color=(0, 255, 0), thickness=1, circle_radius=1),
-                    mp_draw.DrawingSpec(color=(0, 0, 255), thickness=1, circle_radius=1)
-                )
+                # mp_draw.draw_landmarks(
+                #     frame,
+                #     face_landmarks,
+                #     mp_face_mesh.FACEMESH_TESSELATION,
+                #     mp_draw.DrawingSpec(color=(0, 255, 0), thickness=1, circle_radius=1),
+                #     mp_draw.DrawingSpec(color=(0, 0, 255), thickness=1, circle_radius=1)
+                # )
 
         hand_results = hands.process(rgb)
         gesture_detected = False
@@ -148,6 +147,25 @@ try:
                         mp_draw.DrawingSpec(color=(0, 255, 0), thickness=2, circle_radius=2)
                     )
 
+        if face_results.multi_face_landmarks and hand_results.multi_hand_landmarks:
+            for hand_landmarks in hand_results.multi_hand_landmarks:
+                for face_landmarks in face_results.multi_face_landmarks:
+                    scale = calculate_scale(face_landmarks, IMAGE_WIDTH, IMAGE_HEIGHT)
+                    if scale == 0:
+                        scale = 1
+                    if SIGMA_DETECTOR(hand_landmarks, face_landmarks, scale):
+                        gesture_detected = True
+                        detected_gesture = "SIGMA! +RESPECT"
+                        mp_draw.draw_landmarks(
+                            frame,
+                            hand_landmarks,
+                            mp_hands.HAND_CONNECTIONS,
+                            mp_draw.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2),
+                            mp_draw.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2)
+                        )
+                        color = (0, 0, 255)
+                        cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
+
         # Добавляем текст с названием жеста (если обнаружен)
         if gesture_detected and detected_gesture:
             cv2.putText(frame, detected_gesture, (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
@@ -162,7 +180,7 @@ try:
             y_position += 40
             detected_emotions_new.append("Smile")
         if puckered_lips_detected:
-            cv2.putText(frame, "SIGMA/Puckered Lips", (50, y_position), cv2.FONT_HERSHEY_SIMPLEX,
+            cv2.putText(frame, "Puckered Lips", (50, y_position), cv2.FONT_HERSHEY_SIMPLEX,
                         1, (0, 165, 255), 2, cv2.LINE_AA)
             y_position += 40
             detected_emotions_new.append("Puckered Lips")
