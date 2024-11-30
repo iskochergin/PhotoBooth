@@ -50,6 +50,11 @@ Welcome to the **Gesture-Activated Photo Booth** project! Capture memorable mome
 3. **Photo Capture**
    - The application will automatically take a photo when it detects any of the above gestures or expressions and save it in the new folder "session_{date_time}" playing a nice sound!
 
+4. **Some Photos**
+   ![Photo 1](media/photo1.png)
+   ![Photo 2](media/photo2.png)
+   _The photos are displayed with highlighted emotions and gestures to demonstrate how the program works. However, it actually saves results without any highlights._  
+
 ## Credits 📝
 
 This project is programmed by Ivan Kochergin and licensed under the [MIT License](https://opensource.org/licenses/MIT).

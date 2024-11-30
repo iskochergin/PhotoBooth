@@ -34,7 +34,7 @@ IMAGE_HEIGHT = 720
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(
     static_image_mode=False,
-    max_num_faces=5,
+    max_num_faces=6,
     refine_landmarks=True,
     min_detection_confidence=0.7,
     min_tracking_confidence=0.7
@@ -222,6 +222,11 @@ try:
                             mp_draw.DrawingSpec(color=(0, 0, 255), thickness=2, circle_radius=2)
                         )
                         color = (0, 0, 255)
+                        x_coords = [lm.x for lm in face_landmarks.landmark]
+                        y_coords = [lm.y for lm in face_landmarks.landmark]
+                        h, w, _ = frame.shape
+                        xmin, xmax = int(min(x_coords) * w), int(max(x_coords) * w)
+                        ymin, ymax = int(min(y_coords) * h), int(max(y_coords) * h)
                         cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
                         detected_emotions_new.append(detected_gesture)
                         no_sigma_frames = 0
@@ -237,7 +242,7 @@ try:
             detected_emotions = detected_emotions_new
 
         # Условие для сохранения снимка: обнаружено любое выражение лица или один из жестов
-        if same_detect_count == 20 or (same_detect_count % 52 == 0 and same_detect_count != 0):
+        if same_detect_count == 15 or (same_detect_count % 35 == 0 and same_detect_count != 0):
             if not snapshot_taken:
                 try:
                     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
