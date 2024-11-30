@@ -271,6 +271,6 @@ finally:
     print("Ресурсы освобождены")
 
     # Удаление размытых фотографий
-    # delete_blurred_images(SESSION_NAME, threshold=50)
-    # print("Размытые фотографии удалены")
+    delete_blurred_images(SESSION_NAME, threshold=10)
+    print("Размытые фотографии удалены")
     print("Программа завершена")
