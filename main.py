@@ -2,9 +2,31 @@ import cv2
 import datetime
 import os
 from delete_blured import delete_blurred_images
+import pygame
 from functions import *
 
-SESSION_NAME = f'session_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}'
+pygame.mixer.init()
+
+
+def play_background_music():
+    pygame.mixer.music.load('media/background_music.mp3')
+    pygame.mixer.music.set_volume(0.2)
+    pygame.mixer.music.play(-1)
+
+
+def play_image_save_sound():
+    image_save_sound = pygame.mixer.Sound('media/image_save_sound.wav')
+    image_save_sound.play()
+
+
+def play_sigma_sound():
+    sigma_sound = pygame.mixer.Sound('media/sigma_sound.wav')
+    sigma_sound.play()
+
+
+if not os.path.exists("sessions"):
+    os.mkdir("sessions")
+SESSION_NAME = f'sessions/{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}'
 os.mkdir(SESSION_NAME)
 IMAGE_WIDTH = 1280
 IMAGE_HEIGHT = 720
@@ -36,6 +58,9 @@ snapshot_taken = False
 count_frames = 0
 detected_emotions = []
 same_detect_count = 0
+no_sigma_frames = 20
+
+play_background_music()
 
 try:
     while True:
@@ -49,8 +74,10 @@ try:
         face_results = face_mesh.process(rgb)
         count_frames += 1
 
-        if count_frames < 150:
+        if count_frames < 180:
             cv2.putText(frame, "Show some emotion and freeze!", (140, 270), cv2.FONT_HERSHEY_SIMPLEX,
+                        2, (255, 0, 0), 4, cv2.LINE_AA)
+            cv2.putText(frame, "        Press 'q' to exit", (140, 345), cv2.FONT_HERSHEY_SIMPLEX,
                         2, (255, 0, 0), 4, cv2.LINE_AA)
 
         smile_detected = False
@@ -183,6 +210,10 @@ try:
                     if SIGMA_DETECTOR(hand_landmarks, face_landmarks, scale):
                         gesture_detected = True
                         detected_gesture = "SIGMA! +RESPECT"
+                        if no_sigma_frames >= 20:
+                            play_sigma_sound()
+                        cv2.putText(frame, detected_gesture, (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
+                                    1, (0, 0, 255), 2, cv2.LINE_AA)
                         mp_draw.draw_landmarks(
                             frame,
                             hand_landmarks,
@@ -192,6 +223,10 @@ try:
                         )
                         color = (0, 0, 255)
                         cv2.rectangle(frame, (xmin, ymin), (xmax, ymax), color, 2)
+                        detected_emotions_new.append(detected_gesture)
+                        no_sigma_frames = 0
+        if detected_gesture != "SIGMA! +RESPECT":
+            no_sigma_frames += 1
 
         cv2.imshow('PhotoBooth', frame)
 
@@ -202,7 +237,7 @@ try:
             detected_emotions = detected_emotions_new
 
         # Условие для сохранения снимка: обнаружено любое выражение лица или один из жестов
-        if same_detect_count == 25 or (same_detect_count % 52 == 0 and same_detect_count != 0):
+        if same_detect_count == 20 or (same_detect_count % 52 == 0 and same_detect_count != 0):
             if not snapshot_taken:
                 try:
                     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -210,6 +245,7 @@ try:
                     cv2.imwrite(filename, original_frame)
                     print(f"Снимок сохранён как {filename}")
                     snapshot_taken = True
+                    play_image_save_sound()
                 except Exception as e:
                     print(f"Ошибка при сохранении снимка: {e}")
         else:

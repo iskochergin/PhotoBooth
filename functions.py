@@ -214,7 +214,7 @@ def is_hear_gesture(hand_landmarks):
                 is_fist = False
                 break
 
-    return is_fist and 6 < thumb_angle < 12 and not is_fist_gesture(hand_landmarks)
+    return is_fist and 6 < thumb_angle < 12 and not is_fist_gesture(hand_landmarks) and not is_stop_signal(hand_landmarks)
 
 
 def is_thumb_up(hand_landmarks):
