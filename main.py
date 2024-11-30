@@ -58,7 +58,7 @@ snapshot_taken = False
 count_frames = 0
 detected_emotions = []
 same_detect_count = 0
-no_sigma_frames = 20
+no_sigma_frames = 10
 
 play_background_music()
 
@@ -210,7 +210,7 @@ try:
                     if SIGMA_DETECTOR(hand_landmarks, face_landmarks, scale):
                         gesture_detected = True
                         detected_gesture = "SIGMA! +RESPECT"
-                        if no_sigma_frames >= 20:
+                        if no_sigma_frames >= 10:
                             play_sigma_sound()
                         cv2.putText(frame, detected_gesture, (50, 50), cv2.FONT_HERSHEY_SIMPLEX,
                                     1, (0, 0, 255), 2, cv2.LINE_AA)
