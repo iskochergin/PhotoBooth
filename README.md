@@ -48,7 +48,7 @@ Welcome to the **Gesture-Activated Photo Booth** project! Capture memorable mome
    - ENJOY SIGMA EMOJI!!! 🤫🧏
 
 3. **Photo Capture**
-   - The application will automatically take a photo when it detects any of the above gestures or expressions and save it in the new folder "session_{date_time}" playing a nice sound!
+   - The application will automatically take a photo when it detects any of the above gestures or expressions and save it in the folder "sessions\date_time" which is created for each session playing a nice sound! After processing all photos program will automatically delete blured ones.
 
 4. **Some Photos**
    ![Photo 1](media/photo1.png)
